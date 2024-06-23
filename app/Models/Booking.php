@@ -13,11 +13,11 @@ class Booking extends Model
         'item_id',
         'user_id',
         'start_date',
-        'end_date'
+        'end_date',
     ];
 
     public function item()
     {
-        return $this->belongsTo(Item::class, 'item_id'); // Zorg ervoor dat de juiste kolomnaam wordt gebruikt
+        return $this->belongsTo(Item::class, 'item_id');
     }
 }

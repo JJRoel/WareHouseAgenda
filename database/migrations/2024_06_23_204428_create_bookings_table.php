@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('bookings', function (Blueprint $table) {
+            $table->id(); // This will create a BIGINT UNSIGNED auto-incrementing primary key
+            $table->unsignedBigInteger('item_id'); // Ensure this is the same type as the 'id' in 'item_id' table
+            $table->unsignedBigInteger('user_id'); // Ensure this is the same type as the 'id' in 'users' table
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->timestamps();
+            
+            // Foreign keys
+            $table->foreign('item_id')->references('id')->on('item_id')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('bookings');
+    }
+};

@@ -4,13 +4,26 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{{ url('/agenda?thismonth=' . ($thisMonth - 1) . '&thisyear=' . $thisYear) }}" class="btn btn-secondary">&laquo; Vorige</a>
+        @php
+            $prevMonth = $thisMonth - 1;
+            $prevYear = $thisYear;
+            if ($prevMonth < 1) {
+                $prevMonth = 12;
+                $prevYear -= 1;
+            }
+            $nextMonth = $thisMonth + 1;
+            $nextYear = $thisYear;
+            if ($nextMonth > 12) {
+                $nextMonth = 1;
+                $nextYear += 1;
+            }
+        @endphp
+
+        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $prevMonth . '&thisyear=' . $prevYear) }}" class="btn btn-secondary">&laquo; Vorige</a>
         <h1 class="text-center">{{ $monthName }} {{ $thisYear }}</h1>
-        <a href="{{ url('/agenda?thismonth=' . ($thisMonth + 1) . '&thisyear=' . $thisYear) }}" class="btn btn-secondary">Volgende &raquo;</a>
+        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $nextMonth . '&thisyear=' . $nextYear) }}" class="btn btn-secondary">Volgende &raquo;</a>
     </div>
     <h1 class="mt-4 mb-4">{{ $item->name }}</h1>
-    <p>Code: {{ $item->code }}</p>
-    <a href="{{ url('/') }}" class="btn btn-primary">Back to Items</a>
     
     <table class="table table-bordered mt-4">
         <thead>
@@ -27,6 +40,8 @@
         <tbody>
             @php
                 $firstDayOfMonth = \Carbon\Carbon::create($thisYear, $thisMonth, 1)->dayOfWeek;
+                // Adjust firstDayOfMonth to start from Monday as 0
+                $firstDayOfMonth = ($firstDayOfMonth + 6) % 7;
                 $daysInMonth = \Carbon\Carbon::create($thisYear, $thisMonth)->daysInMonth;
                 $dayCounter = 1;
                 $printedDays = 0;
@@ -39,7 +54,7 @@
                         @elseif ($dayCounter > $daysInMonth)
                             <td></td>
                         @else
-                            <td class="text-center" onclick="window.location.href='{{ url('/agenda/day?jour=' . $dayCounter . '&mois=' . $thisMonth . '&annee=' . $thisYear) }}'">
+                            <td class="text-center day-cell" data-day="{{ $dayCounter }}" data-month="{{ $thisMonth }}" data-year="{{ $thisYear }}">
                                 <strong>{{ $dayCounter }}</strong>
                                 <ul class="list-unstyled">
                                     @foreach ($agendaItems as $agendaItem)
@@ -52,11 +67,114 @@
                             @php $dayCounter++; $printedDays++; @endphp
                         @endif
                     @endfor
-                </tr>
                 @if ($printedDays >= $daysInMonth)
                     @break
                 @endif
+                </tr>
             @endfor
         </tbody>
     </table>
+    <a href="{{ url('/') }}" class="btn btn-primary">Terug naar Items</a>
+
+    <!-- Add the booking modal here -->
+    <div class="modal fade" id="dayModal" tabindex="-1" aria-labelledby="dayModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dayModalLabel">Booking Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="itemSelect" class="form-label">Select Item</label>
+                            <select class="form-select" id="itemSelect">
+                                <!-- Options will be appended here by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="startDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="startDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                        <button type="button" id="saveBooking" class="btn btn-primary">Save Booking</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script>
+        $(document).ready(function() {
+            // Items passed from the backend
+            var items = @json($items);
+
+            // Append "Available" as the first option
+            $('#itemSelect').append(new Option("Available", ""));
+
+            // Append items dynamically
+            items.forEach(function(item) {
+                $('#itemSelect').append(new Option(`${item.code}: ${item.name}`, item.id));
+            });
+
+            $('#itemSelect').on('change', function() {
+                var selectedItem = items.find(item => item.id == this.value);
+                $('#itemCode').val(selectedItem ? selectedItem.code : '');
+                console.log('Selected item:', selectedItem); // Log selected item
+            });
+
+            // Function to show the popup with day details
+            function showDayModal(day, month, year) {
+                $('#dayDetails').text('Details for ' + day + '/' + month + '/' + year);
+                $('#startDate').val(year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day));
+                $('#endDate').val(year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day));
+                $('#dayModal').modal('show');
+            }
+
+            // Attach click event to table cells with day numbers
+            $('.day-cell').on('click', function() {
+                var day = $(this).data('day');
+                var month = $(this).data('month');
+                var year = $(this).data('year');
+                showDayModal(day, month, year);
+            });
+
+            $('#saveBooking').on('click', function() {
+                var itemSelectVal = $('#itemSelect').val();
+                var bookingData = {
+                    user_id: 1, // hardcoded for now, change to dynamic value later
+                    start_date: $('#startDate').val(),
+                    end_date: $('#endDate').val(),
+                    _token: '{{ csrf_token() }}'
+                };
+
+                if (itemSelectVal) {
+                    bookingData.item_id = itemSelectVal;
+                } else {
+                    bookingData.item_name = '{{ $item->name }}';
+                }
+
+                console.log('Booking data:', bookingData); // Log booking data
+
+                $.ajax({
+                    url: '{{ route("bookings.store") }}',
+                    type: 'POST',
+                    data: bookingData,
+                    success: function(response) {
+                        alert('Booking saved');
+                        $('#dayModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.message); // Show custom error message
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
