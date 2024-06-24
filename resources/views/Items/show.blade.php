@@ -17,11 +17,13 @@
                 $nextMonth = 1;
                 $nextYear += 1;
             }
+            $prevMonthName = \Carbon\Carbon::create($prevYear, $prevMonth)->format('F');
+            $nextMonthName = \Carbon\Carbon::create($nextYear, $nextMonth)->format('F');
         @endphp
 
-        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $prevMonth . '&thisyear=' . $prevYear) }}" class="btn btn-secondary">&laquo; Vorige</a>
+        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $prevMonth . '&thisyear=' . $prevYear) }}" class="btn btn-secondary">{{ $prevMonthName }}</a>
         <h1 class="text-center">{{ $monthName }} {{ $thisYear }}</h1>
-        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $nextMonth . '&thisyear=' . $nextYear) }}" class="btn btn-secondary">Volgende &raquo;</a>
+        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $nextMonth . '&thisyear=' . $nextYear) }}" class="btn btn-secondary">{{ $nextMonthName }}</a>
     </div>
     <h1 class="mt-4 mb-4">{{ $item->name }}</h1>
     
@@ -58,7 +60,7 @@
                                 <strong>{{ $dayCounter }}</strong>
                                 <ul class="list-unstyled">
                                     @foreach ($agendaItems as $agendaItem)
-                                        @if (\Carbon\Carbon::create($thisYear, $thisMonth, $dayCounter)->isSameDay($agendaItem->date))
+                                        @if (\Carbon\Carbon::create($thisYear, $thisMonth, $dayCounter)->isSameDay($agendaItem->start_date))
                                             <li>{{ $agendaItem->titre }}</li>
                                         @endif
                                     @endforeach
@@ -74,6 +76,31 @@
             @endfor
         </tbody>
     </table>
+
+    <h2 class="mt-5">Your Bookings for {{ $monthName }} {{ $thisYear }}</h2>
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($userBookings as $booking)
+                <tr>
+                    <td>{{ $booking->item->name }}</td>
+                    <td>{{ \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="3">No bookings for this month.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
     <a href="{{ url('/') }}" class="btn btn-primary">Terug naar Items</a>
 
     <!-- Add the booking modal here -->
@@ -143,6 +170,9 @@
                 var year = $(this).data('year');
                 showDayModal(day, month, year);
             });
+
+            // Add hover effect to day cells
+            $('.day-cell').css('cursor', 'pointer');
 
             $('#saveBooking').on('click', function() {
                 var itemSelectVal = $('#itemSelect').val();

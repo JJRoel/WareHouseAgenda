@@ -1,22 +1,39 @@
 <?php
 
-namespace Database\Seeders;
+namespace App\Http\Controllers;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use App\Models\Item;
 
-class ItemSeeder extends Seeder
+class ItemController extends Controller
 {
-    public function run()
+    public function index()
     {
-        DB::table('item_id')->insert([
-            ['id' => 1, 'name' => 'Car', 'code' => 'CAR001'],
-            ['id' => 2, 'name' => 'Token', 'code' => 'TOK002'],
-            ['id' => 3, 'name' => 'Key', 'code' => 'KEY003'],
-            ['id' => 4, 'name' => 'Car', 'code' => 'CAR004'],
-            ['id' => 5, 'name' => 'Token', 'code' => 'TOK005'],
-            ['id' => 6, 'name' => 'Key', 'code' => 'KEY006'],
-        ]);
+        $items = Item::all();
+        return view('items.index', compact('items'));
+    }
+
+    public function show($name, Request $request)
+    {
+        $thisMonth = $request->query('thismonth', \Carbon\Carbon::now()->month);
+        $thisYear = $request->query('thisyear', \Carbon\Carbon::now()->year);
+
+        $item = Item::where('name', $name)->firstOrFail();
+        $items = Item::where('name', $name)->get();
+
+        $agendaItems = \App\Models\Booking::whereYear('start_date', $thisYear)
+            ->whereMonth('start_date', $thisMonth)
+            ->where('item_id', $item->id)
+            ->get();
+
+        $userBookings = \App\Models\Booking::whereYear('start_date', $thisYear)
+            ->whereMonth('start_date', $thisMonth)
+            ->where('user_id', 2) // Change this to the authenticated user id
+            ->orderBy('start_date') // Order by start_date
+            ->get();
+
+        $monthName = \Carbon\Carbon::create($thisYear, $thisMonth)->format('F');
+
+        return view('items.show', compact('item', 'items', 'agendaItems', 'userBookings', 'thisMonth', 'thisYear', 'monthName'));
     }
 }
-

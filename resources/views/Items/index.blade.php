@@ -1,40 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Items</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .container-wrapper {
-            border: 1px solid #000;
-            margin-bottom: 10px;
-            background-color: #b3d9ff;
-            cursor: pointer;
-            padding: 10px;
-        }
-        .text {
-            font-size: 1.25rem;
-        }
-        .container-wrapper a {
-            text-decoration: none;
-            color: inherit;
-        }
-    </style>
-</head>
-<body>
+@extends('layouts.app')
+
+@section('title', 'Items List')
+
+@section('content')
     <div class="container mt-5">
-        <h1 class="mt-4 mb-4">Items</h1>
-        @foreach($items as $item)
-            <div class="container-wrapper">
-                <a href="{{ route('items.show', $item->name) }}">
-                    <div class="text">{{ $item->name }}</div>
-                </a>
-            </div>
-        @endforeach
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($items->unique('name') as $item)
+                    <tr>
+                        <td>
+                            <a href="{{ url('/items/' . $item->name) }}" class="item-link">
+                                <div class="text">{{ $item->name }}</div>
+                            </a>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <style>
+        .text {
+            font-size: 1.25rem;
+            color: black;
+        }
+        .item-link {
+            color: black;
+            text-decoration: none;
+        }
+        .item-link:hover {
+            color: black;
+            text-decoration: underline;
+        }
+    </style>
+@endsection

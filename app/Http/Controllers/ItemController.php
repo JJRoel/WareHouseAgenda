@@ -2,42 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
 use Illuminate\Http\Request;
+use App\Models\Item;
+use App\Models\Booking;
 use Carbon\Carbon;
+use App\Helpers\UserHelper;
 
 class ItemController extends Controller
 {
     public function index()
     {
-        // Fetch unique item names
-        $items = Item::select('name')->distinct()->get();
+        $items = Item::all();
         return view('items.index', compact('items'));
     }
 
     public function show($name, Request $request)
     {
-        // Fetch item details by name
+        $thisMonth = $request->query('thismonth', Carbon::now()->month);
+        $thisYear = $request->query('thisyear', Carbon::now()->year);
+
         $item = Item::where('name', $name)->firstOrFail();
-
-        // Get the month and year from the request or use the current month and year
-        $thisMonth = $request->get('thismonth', Carbon::now()->month);
-        $thisYear = $request->get('thisyear', Carbon::now()->year);
-        $monthName = Carbon::create($thisYear, $thisMonth, 1)->format('F');
-
-        // Mock data for agenda items (replace with actual data fetching logic)
-        $agendaItems = []; // Replace with actual fetching logic
-
-        // Fetch items with the same name
         $items = Item::where('name', $name)->get();
 
-        return view('items.show', compact('item', 'thisMonth', 'thisYear', 'monthName', 'agendaItems', 'items'));
+        $agendaItems = Booking::whereYear('start_date', $thisYear)
+            ->whereMonth('start_date', $thisMonth)
+            ->where('item_id', $item->id)
+            ->get();
+
+        $userId = UserHelper::getUserId(); // Use the helper method to get the user ID
+
+        $userBookings = Booking::whereYear('start_date', $thisYear)
+            ->whereMonth('start_date', $thisMonth)
+            ->where('user_id', $userId) // Use the correct user ID
+            ->orderBy('start_date') // Order by start_date
+            ->get();
+
+        $monthName = Carbon::create($thisYear, $thisMonth)->format('F');
+
+        return view('items.show', compact('item', 'items', 'agendaItems', 'userBookings', 'thisMonth', 'thisYear', 'monthName'));
     }
 }
-
-
-
-
-
-
-

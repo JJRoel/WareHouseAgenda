@@ -3,9 +3,10 @@
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\BookingController;
 
-Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
 Route::get('/', [ItemController::class, 'index']);
-Route::get('/items/{name}', [ItemController::class, 'show'])->name('items.show');
+Route::get('/items/{name}', [ItemController::class, 'show']);
+Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
+
 
 
 
