@@ -9,14 +9,38 @@ class ItemSeeder extends Seeder
 {
     public function run()
     {
-        DB::table('item_id')->insert([
-            ['id' => 1, 'name' => 'Car', 'code' => 'CAR001'],
-            ['id' => 2, 'name' => 'Token', 'code' => 'TOK002'],
-            ['id' => 3, 'name' => 'Key', 'code' => 'KEY003'],
-            ['id' => 4, 'name' => 'Car', 'code' => 'CAR004'],
-            ['id' => 5, 'name' => 'Token', 'code' => 'TOK005'],
-            ['id' => 6, 'name' => 'Key', 'code' => 'KEY006'],
-        ]);
+        $items = [
+            'Laptop',
+            'Car',
+            'Toetsenbord',
+            'Monitor',
+            'Muis',
+            'Tablet',
+            'Smartphone',
+            'Camera',
+            'Headset',
+        ];
+
+        foreach ($items as $index => $item) {
+            // Haal het group id op voor de huidige item naam
+            $group = DB::table('group')->where('name', $item)->first();
+
+            if ($group) {
+                DB::table('item_id')->insert([
+                    'groupid' => $group->id,
+                    'name' => $item,
+                    'aanschafdatum' => '2023-0' . ($index % 9 + 1) . '-01',
+                    'tiernummer' => 'Tier ' . ($index % 3 + 1),
+                    'status' => $index % 2 == 0 ? 'active' : 'inactive',
+                    'picture' => 'path/to/picture' . ($index + 1) . '.jpg',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                // Foutmelding als de groep niet bestaat
+                $this->command->error("Group for item '{$item}' not found!");
+            }
+        }
     }
 }
 
