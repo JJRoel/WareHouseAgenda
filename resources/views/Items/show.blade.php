@@ -21,9 +21,9 @@
             $nextMonthName = \Carbon\Carbon::create($nextYear, $nextMonth)->format('F');
         @endphp
 
-        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $prevMonth . '&thisyear=' . $prevYear) }}" class="btn btn-secondary">{{ $prevMonthName }}</a>
+        <a href="{{ url('/items/' . $item->groupid . '?thismonth=' . $prevMonth . '&thisyear=' . $prevYear) }}" class="btn btn-secondary">{{ $prevMonthName }}</a>
         <h1 class="text-center">{{ $monthName }} {{ $thisYear }}</h1>
-        <a href="{{ url('/items/' . $item->name . '?thismonth=' . $nextMonth . '&thisyear=' . $nextYear) }}" class="btn btn-secondary">{{ $nextMonthName }}</a>
+        <a href="{{ url('/items/' . $item->groupid . '?thismonth=' . $nextMonth . '&thisyear=' . $nextYear) }}" class="btn btn-secondary">{{ $nextMonthName }}</a>
     </div>
     <h1 class="mt-4 mb-4">{{ $item->name }}</h1>
     

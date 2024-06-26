@@ -1,3 +1,4 @@
+<!-- resources/views/test-view.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'All Items')
@@ -8,7 +9,7 @@
         <table class="table table-bordered mt-4">
             <thead>
                 <tr>
-                    <th>Group Name</th>
+                    <th>Group ID</th>
                     <th>Name</th>
                     <th>Aanschafdatum</th>
                     <th>Tiernummer</th>
@@ -19,14 +20,8 @@
             <tbody>
                 @foreach ($items as $item)
                     <tr>
-                        <td>{{ $item->group->name }}</td>
-                        <td>
-                            <form action="{{ route('administration.items.updateName', $item->id) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <input type="text" name="name" class="form-control" value="{{ $item->name }}" onchange="this.form.submit()">
-                            </form>
-                        </td>
+                        <td>{{ $item->groupid }}</td>
+                        <td>{{ $item->name }}</td>
                         <td>{{ $item->aanschafdatum }}</td>
                         <td>{{ $item->tiernummer }}</td>
                         <td>

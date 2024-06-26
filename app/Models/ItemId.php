@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,11 +13,19 @@ class ItemId extends Model
 
     protected $fillable = [
         'id',
+        'groupid',
         'name',
         'aanschafdatum',
         'tiernummer',
         'status',
         'picture',
     ];
+
+    public function group()
+    {
+        return $this->belongsTo(group::class, 'groupid');
+    }
 }
+
+
 

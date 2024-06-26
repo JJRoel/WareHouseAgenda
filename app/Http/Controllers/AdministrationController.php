@@ -9,22 +9,22 @@ class AdministrationController extends Controller
 {
     public function index()
     {
-        $items = ItemId::all();
+        $items = ItemId::with('group')->orderBy('groupid')->get();
         return view('administration.items.index', compact('items'));
     }
 
-    public function show($name)
+    public function show($groupid)
     {
-        $items = ItemId::where('name', $name)->get();
+        $items = ItemId::with('group')->where('groupid', $groupid)->get();
         if ($items->isEmpty()) {
             abort(404);
         }
         return view('administration.items.show', compact('items'));
     }
 
-    public function showall()
+    public function showAll()
     {
-        $items = ItemId::all();
+        $items = ItemId::with('group')->orderBy('groupid')->get();
         return view('administration.items.showall', compact('items'));
     }
 
@@ -36,10 +36,13 @@ class AdministrationController extends Controller
 
         return redirect()->back()->with('status', 'Item status updated successfully!');
     }
+
+    public function updateName(Request $request, $id)
+    {
+        $item = ItemId::findOrFail($id);
+        $item->name = $request->input('name');
+        $item->save();
+
+        return redirect()->back()->with('status', 'Item name updated successfully!');
+    }
 }
-
-
-
-
-
-

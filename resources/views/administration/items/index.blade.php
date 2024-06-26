@@ -18,11 +18,11 @@
                         </a>
                     </td>
                 </tr>
-                @foreach($items->unique('name') as $item)
+                @foreach($items->unique('groupid') as $item)
                     <tr>
                         <td>
-                            <a href="{{ route('administration.items.show', $item->name) }}" class="item-link">
-                                <div class="text">{{ $item->name }}</div>
+                            <a href="{{ route('administration.items.show', $item->groupid) }}" class="item-link">
+                                <div class="text">{{ $item->group->name }}</div>
                             </a>
                         </td>
                     </tr>

@@ -16,13 +16,15 @@ class ItemController extends Controller
         return view('items.index', compact('items'));
     }
 
-    public function show($name, Request $request)
+    public function show($groupid, Request $request)
     {
         $thisMonth = $request->query('thismonth', Carbon::now()->month);
         $thisYear = $request->query('thisyear', Carbon::now()->year);
 
-        $item = Item::where('name', $name)->firstOrFail();
-        $items = Item::where('name', $name)->get();
+        // Ensure we are fetching the correct item
+        $item = Item::where('groupid', $groupid)->firstOrFail();
+
+        $items = Item::where('groupid', $groupid)->get();
 
         $agendaItems = Booking::whereYear('start_date', $thisYear)
             ->whereMonth('start_date', $thisMonth)
@@ -41,4 +43,25 @@ class ItemController extends Controller
 
         return view('items.show', compact('item', 'items', 'agendaItems', 'userBookings', 'thisMonth', 'thisYear', 'monthName'));
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $item = Item::findOrFail($id);
+        $item->status = $request->input('status');
+        $item->save();
+
+        return redirect()->back()->with('status', 'Item status updated successfully!');
+    }
+
+    public function updateName(Request $request, $id)
+    {
+        $item = Item::findOrFail($id);
+        $item->name = $request->input('name');
+        $item->save();
+
+        return redirect()->back()->with('status', 'Item name updated successfully!');
+    }
 }
+
+
+
