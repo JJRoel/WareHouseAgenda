@@ -95,3 +95,7 @@ To get started with WareHouseAgenda, follow these steps:
 To start the development server, run:
 ```bash
 php artisan serve
+```
+de volgende programmas moet je ook downloaden om het werkend te krijgen
+https://windows.php.net/download/
+https://getcomposer.org/download/
