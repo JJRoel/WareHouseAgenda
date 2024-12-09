@@ -96,6 +96,8 @@ To start the development server, run:
 ```bash
 php artisan serve
 ```
-de volgende programmas moet je ook downloaden om het werkend te krijgen
+The following programs are needed for the program to work
+
 https://windows.php.net/download/
+
 https://getcomposer.org/download/
